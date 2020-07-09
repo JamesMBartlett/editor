@@ -54,6 +54,7 @@ export interface State {
   normalizedVegaLiteSpec: any;
   vegaSpec: Spec;
   view: View;
+  secondView: View;
   errors: string[];
   warns: string[];
   infos: string[];
@@ -103,6 +104,7 @@ export const DEFAULT_STATE: State = {
   normalizedVegaLiteSpec: null,
   vegaSpec: {},
   view: null,
+  secondView: null,
   errors: [],
   warns: [],
   debugs: [],

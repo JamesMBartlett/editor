@@ -12,6 +12,7 @@ import {KEYCODES, Mode} from '../../constants';
 import addProjections from '../../utils/addProjections';
 import './index.css';
 import {dispatchingLogger} from '../../utils/logger';
+import {View} from 'vega';
 
 // Add additional projections
 addProjections(vega.projection);
@@ -88,6 +89,29 @@ class Editor extends React.PureComponent<Props, State> {
         }
       }
     }
+    const specAsAny = spec as any;
+    if (specAsAny.views) {
+      for (const view of Object.values(specAsAny.views)) {
+        if (view.signals) {
+          for (const signal of view.signals) {
+            if (
+              signal.name == 'width' &&
+              (signal as vega.InitSignal).init &&
+              (signal as vega.InitSignal).init.indexOf('containerSize') >= 0
+            ) {
+              responsiveWidth = true;
+            }
+            if (
+              signal.name == 'height' &&
+              (signal as vega.InitSignal).init &&
+              (signal as vega.InitSignal).init.indexOf('containerSize') >= 0
+            ) {
+              responsiveHeight = true;
+            }
+          }
+        }
+      }
+    }
     return {responsiveWidth, responsiveHeight};
   }
 
@@ -126,7 +150,7 @@ class Editor extends React.PureComponent<Props, State> {
 
   // Initialize the view instance
   public initView() {
-    const {vegaSpec, config, baseURL, mode, setView, hoverEnable} = this.props;
+    const {vegaSpec, config, baseURL, mode, setView, setSecondView, hoverEnable} = this.props;
 
     let runtime: vega.Runtime;
     if (mode === Mode.VegaLite) {
@@ -135,6 +159,7 @@ class Editor extends React.PureComponent<Props, State> {
     } else {
       runtime = vega.parse(vegaSpec, config);
     }
+    console.log('runtime', runtime);
     const loader = vega.loader();
     const originalLoad = loader.load.bind(loader);
 
@@ -159,15 +184,31 @@ class Editor extends React.PureComponent<Props, State> {
     }
 
     const hover = typeof hoverEnable === 'boolean' ? hoverEnable : mode === Mode.Vega;
-    const view = new vega.View(runtime, {
-      hover,
-      loader,
-    });
+    let view: View;
+    let secondview: View;
+    if (runtime.multi) {
+      const views = new vega.MultiView(runtime, {
+        hover,
+        loader,
+      });
+      view = views['myview'];
+      secondview = views['myview2'];
+    } else {
+      view = new vega.View(runtime, {
+        hover,
+        loader,
+      });
+    }
 
     (view as any).logger(dispatchingLogger);
 
     (window as any).VEGA_DEBUG.view = view;
     setView(view);
+    if (secondview) {
+      console.log('secondview init', secondview);
+      (secondview as any).logger(dispatchingLogger);
+    }
+    setSecondView(secondview);
   }
 
   public renderVega() {
@@ -181,7 +222,8 @@ class Editor extends React.PureComponent<Props, State> {
     // Parsing pathname from URL
     Editor.pathname = window.location.hash.split('#')[1];
 
-    const {view, renderer, tooltipEnable} = this.props;
+    const {view, secondView, renderer, tooltipEnable} = this.props;
+    console.log(this.props);
 
     if (!view) {
       return;
@@ -195,9 +237,17 @@ class Editor extends React.PureComponent<Props, State> {
       // Tooltip needs to be added after initializing the view with `chart`
       vegaTooltip(view);
     }
+
+    if (secondView) {
+      console.log('secondview render', secondView);
+      const chart2 = this.refs.chart2 as any;
+      secondView.renderer(renderer).initialize(chart2);
+      secondView.runAsync();
+    }
   }
 
   public triggerResize() {
+    console.log('triggering Resize');
     try {
       window.dispatchEvent(new Event('resize'));
     } catch (e) {
@@ -299,6 +349,7 @@ class Editor extends React.PureComponent<Props, State> {
             className="chart-overlay"
           ></div>
           <div aria-label="visualization" ref="chart" style={chartStyle} />
+          <div ref="chart2" style={chartStyle} />
           {this.renderResizeHandle()}
         </div>
         <div className="fullscreen-open">

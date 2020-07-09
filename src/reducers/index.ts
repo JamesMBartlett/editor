@@ -40,6 +40,7 @@ import {
   SET_VEGA_EXAMPLE,
   SET_VEGA_LITE_EXAMPLE,
   SET_VIEW,
+  SET_SECOND_VIEW,
   SHOW_LOGS,
   TOGGLE_AUTO_PARSE,
   TOGGLE_COMPILED_VEGA_SPEC,
@@ -434,6 +435,11 @@ export default (state: State = DEFAULT_STATE, action: Action): State => {
       return {
         ...state,
         view: action.view,
+      };
+    case SET_SECOND_VIEW:
+      return {
+        ...state,
+        secondView: action.view,
       };
     case SET_DEBUG_PANE_SIZE:
       return {

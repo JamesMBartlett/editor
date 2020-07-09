@@ -20,6 +20,7 @@ export const SET_RENDERER = 'SET_RENDERER' as const;
 export const SET_VEGA_EXAMPLE = 'SET_VEGA_EXAMPLE' as const;
 export const SET_VEGA_LITE_EXAMPLE = 'SET_VEGA_LITE_EXAMPLE' as const;
 export const SET_VIEW = 'SET_VIEW' as const;
+export const SET_SECOND_VIEW = 'SET_SECOND_VIEW' as const;
 export const SHOW_LOGS = 'SHOW_LOGS' as const;
 export const TOGGLE_AUTO_PARSE = 'TOGGLE_AUTO_PARSE' as const;
 export const TOGGLE_COMPILED_VEGA_SPEC = 'TOGGLE_COMPILED_VEGA_SPEC' as const;
@@ -76,6 +77,7 @@ export type Action =
   | SetRenderer
   | SetBaseUrl
   | SetView
+  | SetSecondView
   | SetDebugPaneSize
   | ShowLogs
   | SetCompiledVegaPaneSize
@@ -257,6 +259,15 @@ export function setView(view: View) {
   };
 }
 export type SetView = ReturnType<typeof setView>;
+
+export function setSecondView(view: View) {
+  console.log('setting second view');
+  return {
+    type: SET_SECOND_VIEW,
+    view,
+  };
+}
+export type SetSecondView = ReturnType<typeof setSecondView>;
 
 export function setDebugPaneSize(size: number) {
   return {

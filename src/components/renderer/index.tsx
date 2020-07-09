@@ -17,6 +17,7 @@ export function mapStateToProps(state: State) {
     vegaLiteSpec: state.vegaLiteSpec,
     vegaSpec: state.vegaSpec,
     view: state.view,
+    secondView: state.secondView,
     backgroundColor: state.backgroundColor,
   };
 }
@@ -25,6 +26,7 @@ export function mapDispatchToProps(dispatch: Dispatch<EditorActions.Action>) {
   return bindActionCreators(
     {
       setView: EditorActions.setView,
+      setSecondView: EditorActions.setSecondView,
     },
     dispatch
   );
